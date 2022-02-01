@@ -1,0 +1,14 @@
+cluster: devops-1-nonprod
+
+cronJob:
+  interval: "*/10 * * * *"
+  successHistory: 3
+  failHistory: 2
+
+# Create role and rolebinding to attach to specified service account
+createRBAC: true
+
+# Service account to use
+serviceAccount:
+  create: true
+  name: hungpod-sa

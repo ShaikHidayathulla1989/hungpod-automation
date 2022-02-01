@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "..name" . }}
+  labels:
+    {{- include "..labels" . | nindent 4 }}
+spec:
+  successfulJobsHistoryLimit: {{ .Values.cronJob.successHistory | default "3" }}
+  failedJobsHistoryLimit: {{ .Values.cronJob.failHistory | default "2" }}
+  startingDeadlineSeconds: 15
+  schedule: "{{ .Values.cronJob.interval }}"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "..labels" . | nindent 12 }}
+        spec:
+          serviceAccountName: {{ include "..serviceAccountName" . }}
+          containers:
+            - name: hungpod
+              image: bitnami/kubectl:latest
+              imagePullPolicy: Always
+              command: ["/bin/bash"]
+              args: ["/var/pod_restart.sh"]
+              volumeMounts:
+                - name: hungpod-volume
+                  mountPath: /var
+          restartPolicy: OnFailure
+          volumes:
+            - name: hungpod-volume
+              configMap:
+                name: hungpod-cm
